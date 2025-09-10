@@ -1,7 +1,7 @@
 {
   "baseFare": 2.5,
   "pricePerKm": 1,
-  "extraLuggageFee": 20,
+  "extraLuggageFee": 30,
   "largeGroupSurcharge": 5,
   "accessibleVehicleFee": 2,
   "childSeatFee": 3,
