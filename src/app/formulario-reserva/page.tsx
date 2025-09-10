@@ -38,6 +38,34 @@ function TaxiBookingForm() {
       }
     }
 
+  const formatPhoneNumber = (value: string) => {
+    // Eliminar todos los caracteres que no sean números
+    const phoneNumber = value.replace(/\D/g, '')
+    
+    // Aplicar formato español: +34 XXX XXX XXX
+    if (phoneNumber.length === 0) return ''
+    if (phoneNumber.length <= 3) return phoneNumber
+    if (phoneNumber.length <= 6) return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3)}`
+    if (phoneNumber.length <= 9) return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6)}`
+    
+    // Para números con prefijo +34
+    if (phoneNumber.startsWith('34') && phoneNumber.length === 11) {
+      return `+34 ${phoneNumber.slice(2, 5)} ${phoneNumber.slice(5, 8)} ${phoneNumber.slice(8)}`
+    }
+    
+    // Para números de 9 dígitos (formato español estándar)
+    if (phoneNumber.length === 9) {
+      return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6)}`
+    }
+    
+    return phoneNumber
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    updateField('phone', formatted)
+  }
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -117,11 +145,12 @@ function TaxiBookingForm() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
-                  placeholder="Teléfono"
+                  placeholder="Teléfono (ej: 612 345 678)"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => updateField('phone', e.target.value)}
+                  onChange={handlePhoneChange}
                   className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464]"
+                  maxLength={13}
                   required
                 />
                 <Input

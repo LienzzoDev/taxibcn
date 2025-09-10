@@ -167,12 +167,6 @@ export default function AdminDashboard() {
                   Configuración
                 </Button>
               </Link>
-              <Link href="/admin/configuracion">
-                <Button variant="outline" size="sm">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Configuración
-                </Button>
-              </Link>
               <Button
                 variant="outline"
                 size="sm"
