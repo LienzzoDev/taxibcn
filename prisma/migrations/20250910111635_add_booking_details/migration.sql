@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "public"."rides" ADD COLUMN     "flightNumber" TEXT,
+ADD COLUMN     "hasLuggage" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isAirport" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isPort" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "luggageCount" INTEGER,
+ADD COLUMN     "observations" TEXT,
+ADD COLUMN     "passengers" TEXT,
+ADD COLUMN     "paymentMethod" TEXT,
+ADD COLUMN     "paymentStatus" TEXT,
+ADD COLUMN     "portInfo" TEXT,
+ADD COLUMN     "scheduledDate" TEXT,
+ADD COLUMN     "scheduledTime" TEXT,
+ADD COLUMN     "stripePaymentId" TEXT,
+ADD COLUMN     "vehicleType" TEXT;

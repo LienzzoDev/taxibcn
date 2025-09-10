@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  id                String    @id @default(cuid())
+  
+  // Datos del pasajero
+  firstName         String
+  lastName          String
+  phone             String
+  email             String
+  
+  // Trayecto
+  pickupAddress     String
+  pickupLatitude    Float?
+  pickupLongitude   Float?
+  destinationAddress String
+  destinationLatitude Float?
+  destinationLongitude Float?
+  
+  // Configuración del viaje
+  passengers        String    // "4-or-less" o "more-than-4"
+  vehicleType       String    // "standard", "accessible", "child-seats"
+  hasLuggage        Boolean   @default(false)
+  luggageCount      Int?
+  
+  // Programación
+  timing            String    // "now" o "scheduled"
+  scheduledDate     String?
+  scheduledTime     String?
+  
+  // Opciones especiales
+  isAirport         Boolean   @default(false)
+  flightNumber      String?
+  isPort            Boolean   @default(false)
+  portInfo          String?
+  hasObservations   Boolean   @default(false)
+  observations      String?
+  
+  // Pago
+  paymentMethod     String    // "card" o "cash"
+  paymentStatus     PaymentStatus @default(PENDING)
+  stripePaymentId   String?
+  
+  // Precio
+  distance          Float?
+  duration          Int?      // en minutos
+  baseFare          Float
+  distanceFare      Float
+  surcharges        Float
+  totalAmount       Float
+  
+  // Estado y fechas
+  status            BookingStatus @default(PENDING)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@map("bookings")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
