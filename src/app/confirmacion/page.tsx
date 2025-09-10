@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 
 interface BookingDetails {
   id: string
@@ -33,7 +33,7 @@ interface BookingDetails {
   portInfo?: string
 }
 
-export default function ConfirmacionPage() {
+function ConfirmacionContent() {
   const searchParams = useSearchParams()
   const bookingId = searchParams.get('id')
   const [booking, setBooking] = useState<BookingDetails | null>(null)
@@ -281,5 +281,20 @@ export default function ConfirmacionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ConfirmacionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ed7e00] mx-auto mb-4"></div>
+          <p className="text-[#646464]">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmacionContent />
+    </Suspense>
   )
 }
