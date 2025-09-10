@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminToken } from '@/lib/adminAuth'
-import fs from 'fs'
-import path from 'path'
+import { PrismaClient } from '@prisma/client'
 
-// Ruta del archivo de configuración
-const CONFIG_FILE = path.join(process.cwd(), 'src/lib/pricing-config.json')
+const prisma = new PrismaClient()
 
 // Configuración por defecto
 const DEFAULT_CONFIG = {
@@ -19,12 +17,25 @@ const DEFAULT_CONFIG = {
 }
 
 // Función para leer la configuración
-function readConfig() {
+async function readConfig() {
   try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const data = fs.readFileSync(CONFIG_FILE, 'utf8')
-      return JSON.parse(data)
+    const config = await prisma.pricingConfig.findFirst({
+      orderBy: { updatedAt: 'desc' }
+    })
+    
+    if (config) {
+      return {
+        baseFare: config.baseFare,
+        pricePerKm: config.pricePerKm,
+        extraLuggageFee: config.extraLuggageFee,
+        largeGroupSurcharge: config.largeGroupSurcharge,
+        accessibleVehicleFee: config.accessibleVehicleFee,
+        childSeatFee: config.childSeatFee,
+        nightSurcharge: config.nightSurcharge,
+        minimumFare: config.minimumFare
+      }
     }
+    
     return DEFAULT_CONFIG
   } catch (error) {
     console.error('Error reading config:', error)
@@ -33,15 +44,20 @@ function readConfig() {
 }
 
 // Función para escribir la configuración
-function writeConfig(config: any) {
+async function writeConfig(config: any) {
   try {
-    // Crear directorio si no existe
-    const dir = path.dirname(CONFIG_FILE)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2))
+    await prisma.pricingConfig.create({
+      data: {
+        baseFare: config.baseFare,
+        pricePerKm: config.pricePerKm,
+        extraLuggageFee: config.extraLuggageFee,
+        largeGroupSurcharge: config.largeGroupSurcharge,
+        accessibleVehicleFee: config.accessibleVehicleFee,
+        childSeatFee: config.childSeatFee,
+        nightSurcharge: config.nightSurcharge,
+        minimumFare: config.minimumFare
+      }
+    })
     return true
   } catch (error) {
     console.error('Error writing config:', error)
@@ -66,7 +82,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const config = readConfig()
+    const config = await readConfig()
 
     return NextResponse.json({
       success: true,
@@ -82,6 +98,8 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -131,7 +149,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Guardar la configuración
-    const success = writeConfig(newConfig)
+    const success = await writeConfig(newConfig)
 
     if (!success) {
       return NextResponse.json(
@@ -157,5 +175,7 @@ export async function PUT(request: NextRequest) {
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

@@ -82,3 +82,19 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
 }
+
+model PricingConfig {
+  id                    String   @id @default(cuid())
+  baseFare              Float    @default(2.50)
+  pricePerKm            Float    @default(1.00)
+  extraLuggageFee       Float    @default(10.00)
+  largeGroupSurcharge   Float    @default(5.00)
+  accessibleVehicleFee  Float    @default(2.00)
+  childSeatFee          Float    @default(3.00)
+  nightSurcharge        Float    @default(10.00)
+  minimumFare           Float    @default(5.00)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("pricing_config")
+}

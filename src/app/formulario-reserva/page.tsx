@@ -99,7 +99,7 @@ function TaxiBookingForm() {
             {/* Contact Data */}
             <div>
               <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Datos de contacto</h3>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <Input
                   placeholder="Nombre"
                   value={formData.firstName}
@@ -115,7 +115,7 @@ function TaxiBookingForm() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   placeholder="Teléfono"
                   type="tel"
@@ -143,23 +143,24 @@ function TaxiBookingForm() {
                   placeholder="Dirección de recogida"
                   value={formData.pickupAddress}
                   onChange={handleAddressChange('pickupAddress')}
-                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464]"
+                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
                 />
                 <AddressAutocomplete
                   placeholder="Dirección de destino"
                   value={formData.destinationAddress}
                   onChange={handleAddressChange('destinationAddress')}
-                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464]"
+                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
                 />
               </div>
             </div>
 
-            {/* Passengers and Luggage */}
-            <div>
-              <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Pasajeros y viaje</h3>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Passengers and Vehicle - 50% each in same row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {/* Passengers - 50% */}
+              <div>
+                <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Pasajeros</h3>
                 <Select value={formData.passengers} onValueChange={(value) => updateField('passengers', value)}>
-                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]">
+                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] !w-full">
                     <SelectValue placeholder="4 o menos pasajeros" />
                   </SelectTrigger>
                   <SelectContent>
@@ -167,8 +168,13 @@ function TaxiBookingForm() {
                     <SelectItem value="more-than-4">Más de 4 pasajeros</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Vehicle Type - 50% */}
+              <div>
+                <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Vehículo</h3>
                 <Select value={formData.vehicleType} onValueChange={(value) => updateField('vehicleType', value)}>
-                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]">
+                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] !w-full">
                     <SelectValue placeholder="Vehículo estándar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -178,67 +184,71 @@ function TaxiBookingForm() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="luggage" 
-                    className="border-[#dcdcdc]" 
-                    checked={formData.hasLuggage}
-                    onCheckedChange={(checked) => updateField('hasLuggage', checked)}
-                  />
-                  <label htmlFor="luggage" className="text-[#646464] text-sm">
-                    ¿Llevas maletas?
-                  </label>
-                </div>
-                {formData.hasLuggage && (
-                  <Select value={formData.luggageCount} onValueChange={(value) => updateField('luggageCount', value)}>
-                    <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]">
-                      <SelectValue placeholder="Número de maletas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 maleta</SelectItem>
-                      <SelectItem value="2">2 maletas</SelectItem>
-                      <SelectItem value="3">3 maletas</SelectItem>
-                      <SelectItem value="4">4 maletas</SelectItem>
-                      <SelectItem value="5">5+ maletas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
             </div>
 
-            {/* Trip Timing */}
-            <div>
-              <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Inmediato o programar viaje</h3>
-              <Select value={formData.timing} onValueChange={(value) => updateField('timing', value)}>
-                <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]">
-                  <SelectValue placeholder="Necesito el taxi ya" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="now">Necesito el taxi ya</SelectItem>
-                  <SelectItem value="scheduled">Programar viaje</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {formData.timing === 'scheduled' && (
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <Input
-                    type="date"
-                    value={formData.scheduledDate || ''}
-                    onChange={(e) => updateField('scheduledDate', e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
-                    required
-                  />
-                  <Input
-                    type="time"
-                    value={formData.scheduledTime || ''}
-                    onChange={(e) => updateField('scheduledTime', e.target.value)}
-                    className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
-                    required
-                  />
-                </div>
+            {/* Luggage Section */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Checkbox 
+                  id="luggage" 
+                  className="border-[#dcdcdc]" 
+                  checked={formData.hasLuggage}
+                  onCheckedChange={(checked) => updateField('hasLuggage', checked)}
+                />
+                <label htmlFor="luggage" className="text-[#646464] text-sm">
+                  ¿Llevas maletas?
+                </label>
+              </div>
+              {formData.hasLuggage && (
+                <Select value={formData.luggageCount} onValueChange={(value) => updateField('luggageCount', value)}>
+                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] w-full">
+                    <SelectValue placeholder="Número de maletas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 maleta</SelectItem>
+                    <SelectItem value="2">2 maletas</SelectItem>
+                    <SelectItem value="3">3 maletas</SelectItem>
+                    <SelectItem value="4">4 maletas</SelectItem>
+                    <SelectItem value="5">5+ maletas</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
+            </div>
+
+            {/* Trip Timing - 100% width below */}
+            <div>
+              <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Viaje</h3>
+              <div className="space-y-4">
+                <Select value={formData.timing} onValueChange={(value) => updateField('timing', value)}>
+                  <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] w-full">
+                    <SelectValue placeholder="Necesito el taxi ya" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="now">Necesito el taxi ya</SelectItem>
+                    <SelectItem value="scheduled">Programar viaje</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {formData.timing === 'scheduled' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      type="date"
+                      value={formData.scheduledDate || ''}
+                      onChange={(e) => updateField('scheduledDate', e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
+                      required
+                    />
+                    <Input
+                      type="time"
+                      value={formData.scheduledTime || ''}
+                      onChange={(e) => updateField('scheduledTime', e.target.value)}
+                      className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
+                      required
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Additional Options */}
@@ -264,7 +274,7 @@ function TaxiBookingForm() {
                   placeholder="Número de vuelo (ej: IB6251, VY1234)"
                   value={formData.flightNumber || ''}
                   onChange={(e) => updateField('flightNumber', e.target.value)}
-                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] ml-6"
+                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] ml-6 w-full"
                 />
               )}
               
@@ -289,7 +299,7 @@ function TaxiBookingForm() {
                   placeholder="Número de crucero, naviera o terminal (ej: MSC Seaside, Terminal A)"
                   value={formData.portInfo || ''}
                   onChange={(e) => updateField('portInfo', e.target.value)}
-                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] ml-6"
+                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] ml-6 w-full"
                 />
               )}
               
@@ -309,7 +319,7 @@ function TaxiBookingForm() {
                   placeholder="Escribe tus observaciones aquí..."
                   value={formData.observations || ''}
                   onChange={(e) => updateField('observations', e.target.value)}
-                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464]"
+                  className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
                 />
               )}
             </div>
@@ -318,7 +328,7 @@ function TaxiBookingForm() {
             <div>
               <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Forma de pago</h3>
               <Select value={formData.paymentMethod} onValueChange={(value) => updateField('paymentMethod', value)}>
-                <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]">
+                <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] w-full">
                   <SelectValue placeholder="Pagar con tarjeta" />
                 </SelectTrigger>
                 <SelectContent>
@@ -352,20 +362,7 @@ function TaxiBookingForm() {
                   </p>
                   {isCalculating && <Loader2 className="w-4 h-4 animate-spin text-[#ed7e00]" />}
                 </div>
-                {tripCalculation && (
-                  <div className="text-xs text-[#646464] mt-1 space-y-1">
-                    {tripCalculation.distance > 0 && (
-                      <p>{tripCalculation.distance}km • {tripCalculation.duration}min</p>
-                    )}
-                    <div className="space-y-0.5">
-                      <p>Tarifa base: {tripCalculation.baseFare.toFixed(2)}€</p>
-                      <p>Distancia ({tripCalculation.distance}km × 1€): {tripCalculation.distanceFare.toFixed(2)}€</p>
-                      {tripCalculation.surcharges > 0 && (
-                        <p>Suplementos: {tripCalculation.surcharges.toFixed(2)}€</p>
-                      )}
-                    </div>
-                  </div>
-                )}
+
               </div>
               <Button 
                 type="submit"
