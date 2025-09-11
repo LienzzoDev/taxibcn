@@ -126,6 +126,20 @@ export default function AdminConfigPage() {
     }))
   }
 
+  const handlePriceInput = (field: keyof PricingConfig, value: string) => {
+    // Permitir campo vacío y números decimales
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setConfig(prev => ({
+        ...prev,
+        [field]: value === '' ? 0 : parseFloat(value) || 0
+      }))
+    }
+  }
+
+  const formatPriceValue = (value: number) => {
+    return value === 0 ? '' : value.toString()
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
@@ -207,11 +221,10 @@ export default function AdminConfigPage() {
                   Tarifa Base (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.baseFare}
-                  onChange={(e) => updateField('baseFare', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.baseFare)}
+                  onChange={(e) => handlePriceInput('baseFare', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -224,11 +237,10 @@ export default function AdminConfigPage() {
                   Precio por Kilómetro (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.pricePerKm}
-                  onChange={(e) => updateField('pricePerKm', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.pricePerKm)}
+                  onChange={(e) => handlePriceInput('pricePerKm', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -241,11 +253,10 @@ export default function AdminConfigPage() {
                   Tarifa Mínima (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.minimumFare}
-                  onChange={(e) => updateField('minimumFare', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.minimumFare)}
+                  onChange={(e) => handlePriceInput('minimumFare', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -270,11 +281,10 @@ export default function AdminConfigPage() {
                   Vehículo Accesible (PMR) (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.accessibleVehicleFee}
-                  onChange={(e) => updateField('accessibleVehicleFee', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.accessibleVehicleFee)}
+                  onChange={(e) => handlePriceInput('accessibleVehicleFee', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -288,11 +298,10 @@ export default function AdminConfigPage() {
                   Sillas Infantiles (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.childSeatFee}
-                  onChange={(e) => updateField('childSeatFee', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.childSeatFee)}
+                  onChange={(e) => handlePriceInput('childSeatFee', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -317,11 +326,10 @@ export default function AdminConfigPage() {
                   Más de 4 Pasajeros (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.largeGroupSurcharge}
-                  onChange={(e) => updateField('largeGroupSurcharge', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.largeGroupSurcharge)}
+                  onChange={(e) => handlePriceInput('largeGroupSurcharge', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -335,11 +343,10 @@ export default function AdminConfigPage() {
                   Más de 2 Maletas (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.extraLuggageFee}
-                  onChange={(e) => updateField('extraLuggageFee', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.extraLuggageFee)}
+                  onChange={(e) => handlePriceInput('extraLuggageFee', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc]"
                 />
                 <p className="text-xs text-[#646464]">
@@ -364,11 +371,10 @@ export default function AdminConfigPage() {
                   Viajes Nocturnos (22:00 - 06:00) (€)
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={config.nightSurcharge}
-                  onChange={(e) => updateField('nightSurcharge', e.target.value)}
+                  type="text"
+                  placeholder="0.00"
+                  value={formatPriceValue(config.nightSurcharge)}
+                  onChange={(e) => handlePriceInput('nightSurcharge', e.target.value)}
                   className="bg-[#f8f8f8] border-[#dcdcdc] max-w-xs"
                 />
                 <p className="text-xs text-[#646464]">
