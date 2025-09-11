@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         role: 'admin',
         exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 horas
       },
-      process.env.NEXTAUTH_SECRET || 'fallback-secret'
+      process.env.JWT_SECRET || 'fallback-secret'
     )
 
     return NextResponse.json({

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         totalAmount: tripCalculation?.total || 0,
         
         // Estado
-        status: 'CONFIRMED'
+        status: 'PENDING'
       }
     })
 
