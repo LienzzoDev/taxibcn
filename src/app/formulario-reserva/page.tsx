@@ -20,6 +20,10 @@ function TaxiBookingForm() {
   const [paymentError, setPaymentError] = useState('')
   const [showReturnTrip, setShowReturnTrip] = useState(false)
   const [returnTripData, setReturnTripData] = useState({
+    pickupAddress: '',
+    destinationAddress: '',
+    pickupCoords: null,
+    destinationCoords: null,
     timing: 'scheduled',
     scheduledDate: '',
     scheduledTime: '',
@@ -43,6 +47,27 @@ function TaxiBookingForm() {
         } else {
           updateField('destinationCoords', coords)
         }
+      }
+    }
+
+  const handleReturnAddressChange = (field: 'pickupAddress' | 'destinationAddress') => 
+    (value: string, placeDetails?: google.maps.places.PlaceResult) => {
+      setReturnTripData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+      
+      if (placeDetails?.geometry?.location) {
+        const coords = {
+          lat: placeDetails.geometry.location.lat(),
+          lng: placeDetails.geometry.location.lng()
+        }
+        
+        const coordField = field === 'pickupAddress' ? 'pickupCoords' : 'destinationCoords'
+        setReturnTripData(prev => ({
+          ...prev,
+          [coordField]: coords
+        }))
       }
     }
 
@@ -425,7 +450,19 @@ function TaxiBookingForm() {
                     type="button"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium"
                     disabled={!formData.acceptsPrivacy || !tripCalculation}
-                    onClick={() => setShowReturnTrip(!showReturnTrip)}
+                    onClick={() => {
+                      if (!showReturnTrip) {
+                        // Inicializar con direcciones invertidas
+                        setReturnTripData(prev => ({
+                          ...prev,
+                          pickupAddress: formData.destinationAddress,
+                          destinationAddress: formData.pickupAddress,
+                          pickupCoords: formData.destinationCoords,
+                          destinationCoords: formData.pickupCoords
+                        }))
+                      }
+                      setShowReturnTrip(!showReturnTrip)
+                    }}
                   >
                     {showReturnTrip ? 'Quitar vuelta' : 'Añadir vuelta'}
                   </Button>
@@ -434,7 +471,7 @@ function TaxiBookingForm() {
                 <Button 
                   type="submit"
                   className="bg-[#ed7e00] hover:bg-[#d16d00] text-white px-8 py-3 rounded-md font-medium"
-                  disabled={!formData.acceptsPrivacy || !tripCalculation || (showReturnTrip && (!returnTripData.scheduledDate || !returnTripData.scheduledTime))}
+                  disabled={!formData.acceptsPrivacy || !tripCalculation || (showReturnTrip && (!returnTripData.scheduledDate || !returnTripData.scheduledTime || !returnTripData.pickupAddress || !returnTripData.destinationAddress))}
                 >
                   <Lock className="w-4 h-4 mr-2" />
                   {showReturnTrip ? 'Reservar ambos viajes' : 'Reservar y pagar'}
@@ -452,26 +489,26 @@ function TaxiBookingForm() {
                 Viaje de vuelta
               </h2>
               <p className="text-[#646464] text-sm">
-                Las direcciones se invertirán automáticamente para el viaje de regreso
+                Las direcciones se han invertido automáticamente, pero puedes modificarlas si es necesario
               </p>
             </div>
 
             <div className="space-y-6">
-              {/* Return Trip Route - Auto-filled and inverted */}
+              {/* Return Trip Route - Pre-filled but editable */}
               <div>
                 <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Trayecto de vuelta</h3>
                 <div className="space-y-4">
-                  <Input
+                  <AddressAutocomplete
                     placeholder="Dirección de recogida (vuelta)"
-                    value={formData.destinationAddress}
-                    className="bg-[#f0f0f0] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
-                    disabled
+                    value={returnTripData.pickupAddress}
+                    onChange={handleReturnAddressChange('pickupAddress')}
+                    className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
                   />
-                  <Input
+                  <AddressAutocomplete
                     placeholder="Dirección de destino (vuelta)"
-                    value={formData.pickupAddress}
-                    className="bg-[#f0f0f0] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
-                    disabled
+                    value={returnTripData.destinationAddress}
+                    onChange={handleReturnAddressChange('destinationAddress')}
+                    className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
                   />
                 </div>
               </div>
@@ -601,8 +638,8 @@ function TaxiBookingForm() {
                 {showReturnTrip && (
                   <div className="mb-3 pt-2 border-t border-gray-300">
                     <p className="font-medium text-gray-800">Viaje de vuelta:</p>
-                    <p><strong>Desde:</strong> {formData.destinationAddress}</p>
-                    <p><strong>Hasta:</strong> {formData.pickupAddress}</p>
+                    <p><strong>Desde:</strong> {returnTripData.pickupAddress}</p>
+                    <p><strong>Hasta:</strong> {returnTripData.destinationAddress}</p>
                     <p><strong>Fecha:</strong> {returnTripData.scheduledDate} {returnTripData.scheduledTime}</p>
                     {tripCalculation && (
                       <p><strong>Precio:</strong> {tripCalculation.total.toFixed(2)}€</p>
