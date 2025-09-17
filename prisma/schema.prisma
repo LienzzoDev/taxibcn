@@ -29,7 +29,8 @@ model Booking {
   
   // Configuración del viaje
   passengers        String    // "4-or-less" o "more-than-4"
-  vehicleType       String    // "standard", "accessible", "child-seats"
+  vehicleType       String    // "standard", "accessible"
+  needsChildSeat    Boolean   @default(false)
   hasLuggage        Boolean   @default(false)
   luggageCount      Int?
   
@@ -43,6 +44,9 @@ model Booking {
   flightNumber      String?
   isPort            Boolean   @default(false)
   portInfo          String?
+  needsReturnTrip   Boolean   @default(false)
+  returnDate        String?
+  returnTime        String?
   hasObservations   Boolean   @default(false)
   observations      String?
   

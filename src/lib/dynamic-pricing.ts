@@ -50,6 +50,7 @@ export async function calculateTripPriceDynamic(
     hasLuggage?: boolean
     luggageCount?: number
     vehicleType?: string
+    needsChildSeat?: boolean
     passengerGroup?: string
     scheduledDateTime?: Date
   } = {}
@@ -61,7 +62,8 @@ export async function calculateTripPriceDynamic(
     isPort, 
     hasLuggage, 
     luggageCount = 0,
-    vehicleType = 'standard', 
+    vehicleType = 'standard',
+    needsChildSeat = false,
     passengerGroup = '4-or-less',
     scheduledDateTime
   } = options
@@ -85,7 +87,10 @@ export async function calculateTripPriceDynamic(
   // Suplementos por tipo de vehículo
   if (vehicleType === 'accessible') {
     surcharges += config.accessibleVehicleFee
-  } else if (vehicleType === 'child-seats') {
+  }
+
+  // Suplemento por silla de bebé (opción independiente)
+  if (needsChildSeat) {
     surcharges += config.childSeatFee
   }
 

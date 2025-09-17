@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         // Configuración del viaje
         passengers: formData.passengers,
         vehicleType: formData.vehicleType,
+        needsChildSeat: formData.needsChildSeat || false,
         hasLuggage: formData.hasLuggage,
         luggageCount: formData.hasLuggage ? parseInt(formData.luggageCount) : null,
         
@@ -45,6 +46,9 @@ export async function POST(request: NextRequest) {
         flightNumber: formData.flightNumber,
         isPort: formData.isPort,
         portInfo: formData.portInfo,
+        needsReturnTrip: formData.needsReturnTrip || false,
+        returnDate: formData.returnDate,
+        returnTime: formData.returnTime,
         hasObservations: formData.hasObservations,
         observations: formData.observations,
         

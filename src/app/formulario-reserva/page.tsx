@@ -18,6 +18,14 @@ function TaxiBookingForm() {
   const { formData, updateField, tripCalculation, isCalculating, handleSubmit, saveBooking } = useTaxiBooking()
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [showReturnTrip, setShowReturnTrip] = useState(false)
+  const [returnTripData, setReturnTripData] = useState({
+    timing: 'scheduled',
+    scheduledDate: '',
+    scheduledTime: '',
+    hasObservations: false,
+    observations: ''
+  })
   const router = useRouter()
 
   const handleAddressChange = (field: 'pickupAddress' | 'destinationAddress') => 
@@ -209,7 +217,6 @@ function TaxiBookingForm() {
                   <SelectContent>
                     <SelectItem value="standard">Vehículo estándar</SelectItem>
                     <SelectItem value="accessible">Vehículo accesible (PMR)</SelectItem>
-                    <SelectItem value="child-seats">Sillas infantiles</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -234,14 +241,29 @@ function TaxiBookingForm() {
                     <SelectValue placeholder="Número de maletas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 maleta</SelectItem>
-                    <SelectItem value="2">2 maletas</SelectItem>
-                    <SelectItem value="3">3 maletas</SelectItem>
-                    <SelectItem value="4">4 maletas</SelectItem>
-                    <SelectItem value="5">5+ maletas</SelectItem>
+                    <SelectItem value="1-4">1 a 4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="6">6</SelectItem>
+                    <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="8">8</SelectItem>
                   </SelectContent>
                 </Select>
               )}
+            </div>
+
+            {/* Child Seats Section */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="childSeats" 
+                  className="border-[#dcdcdc]" 
+                  checked={formData.needsChildSeat}
+                  onCheckedChange={(checked) => updateField('needsChildSeat', checked)}
+                />
+                <label htmlFor="childSeats" className="text-[#646464] text-sm">
+                  ¿Necesitas sillas infantiles?
+                </label>
+              </div>
             </div>
 
             {/* Trip Timing - 100% width below */}
@@ -331,7 +353,8 @@ function TaxiBookingForm() {
                   className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] ml-6 w-full"
                 />
               )}
-              
+
+
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="observations" 
@@ -384,26 +407,156 @@ function TaxiBookingForm() {
             {/* Price and Book Button */}
             <div className="flex items-center justify-between pt-6 border-t border-[#dcdcdc]">
               <div>
-                <p className="text-[#646464] text-sm mb-1">Precio viaje</p>
+                <p className="text-[#646464] text-sm mb-1">
+                  {showReturnTrip ? 'Total ambos viajes' : 'Precio viaje'}
+                </p>
                 <div className="flex items-center gap-2">
                   <p className="text-[#1c1b1f] text-3xl font-bold">
-                    {tripCalculation ? `${tripCalculation.total.toFixed(2)}€` : '---'}
+                    {tripCalculation ? `${showReturnTrip ? (tripCalculation.total * 2).toFixed(2) : tripCalculation.total.toFixed(2)}€` : '---'}
                   </p>
                   {isCalculating && <Loader2 className="w-4 h-4 animate-spin text-[#ed7e00]" />}
                 </div>
-
               </div>
-              <Button 
-                type="submit"
-                className="bg-[#ed7e00] hover:bg-[#d16d00] text-white px-8 py-3 rounded-md font-medium"
-                disabled={!formData.acceptsPrivacy || !tripCalculation}
-              >
-                <Lock className="w-4 h-4 mr-2" />
-                Reservar y pagar
-              </Button>
+              
+              <div className="flex gap-3">
+                {/* Return Trip Button - Only show if airport or port is selected */}
+                {(formData.isAirport || formData.isPort) && (
+                  <Button 
+                    type="button"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium"
+                    disabled={!formData.acceptsPrivacy || !tripCalculation}
+                    onClick={() => setShowReturnTrip(!showReturnTrip)}
+                  >
+                    {showReturnTrip ? 'Quitar vuelta' : 'Añadir vuelta'}
+                  </Button>
+                )}
+                
+                <Button 
+                  type="submit"
+                  className="bg-[#ed7e00] hover:bg-[#d16d00] text-white px-8 py-3 rounded-md font-medium"
+                  disabled={!formData.acceptsPrivacy || !tripCalculation || (showReturnTrip && (!returnTripData.scheduledDate || !returnTripData.scheduledTime))}
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  {showReturnTrip ? 'Reservar ambos viajes' : 'Reservar y pagar'}
+                </Button>
+              </div>
             </div>
           </form>
         </div>
+
+        {/* Return Trip Form */}
+        {showReturnTrip && (
+          <div className="bg-white rounded-lg p-8 shadow-sm mt-6">
+            <div className="text-center mb-8">
+              <h2 className="text-[#1c1b1f] text-xl font-semibold mb-2">
+                Viaje de vuelta
+              </h2>
+              <p className="text-[#646464] text-sm">
+                Las direcciones se invertirán automáticamente para el viaje de regreso
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Return Trip Route - Auto-filled and inverted */}
+              <div>
+                <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Trayecto de vuelta</h3>
+                <div className="space-y-4">
+                  <Input
+                    placeholder="Dirección de recogida (vuelta)"
+                    value={formData.destinationAddress}
+                    className="bg-[#f0f0f0] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
+                    disabled
+                  />
+                  <Input
+                    placeholder="Dirección de destino (vuelta)"
+                    value={formData.pickupAddress}
+                    className="bg-[#f0f0f0] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              {/* Return Trip Timing */}
+              <div>
+                <h3 className="text-[#1c1b1f] text-sm font-medium mb-4">Programación del viaje de vuelta</h3>
+                <div className="space-y-4">
+                  <Select 
+                    value={returnTripData.timing} 
+                    onValueChange={(value) => setReturnTripData(prev => ({...prev, timing: value}))}
+                  >
+                    <SelectTrigger className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] w-full">
+                      <SelectValue placeholder="Programar viaje de vuelta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="scheduled">Programar viaje de vuelta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      type="date"
+                      value={returnTripData.scheduledDate}
+                      onChange={(e) => setReturnTripData(prev => ({...prev, scheduledDate: e.target.value}))}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
+                      required
+                    />
+                    <Input
+                      type="time"
+                      value={returnTripData.scheduledTime}
+                      onChange={(e) => setReturnTripData(prev => ({...prev, scheduledTime: e.target.value}))}
+                      className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464]"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Return Trip Observations */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="returnObservations" 
+                    className="border-[#dcdcdc]" 
+                    checked={returnTripData.hasObservations}
+                    onCheckedChange={(checked) => setReturnTripData(prev => ({...prev, hasObservations: checked}))}
+                  />
+                  <label htmlFor="returnObservations" className="text-[#646464] text-sm">
+                    Añadir observaciones para el viaje de vuelta
+                  </label>
+                </div>
+                {returnTripData.hasObservations && (
+                  <Input
+                    placeholder="Observaciones para el viaje de vuelta..."
+                    value={returnTripData.observations}
+                    onChange={(e) => setReturnTripData(prev => ({...prev, observations: e.target.value}))}
+                    className="bg-[#f8f8f8] border-[#dcdcdc] text-[#646464] placeholder:text-[#646464] w-full"
+                  />
+                )}
+              </div>
+
+              {/* Return Trip Price Display */}
+              <div className="pt-6 border-t border-[#dcdcdc]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#646464] text-sm mb-1">Precio viaje de vuelta</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[#1c1b1f] text-2xl font-bold">
+                        {tripCalculation ? `${tripCalculation.total.toFixed(2)}€` : '---'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[#646464] text-sm mb-1">Total ambos viajes</p>
+                    <p className="text-[#1c1b1f] text-3xl font-bold">
+                      {tripCalculation ? `${(tripCalculation.total * 2).toFixed(2)}€` : '---'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-8 space-y-2">
@@ -436,21 +589,41 @@ function TaxiBookingForm() {
             <div className="bg-gray-50 p-4 rounded-md">
               <h4 className="font-medium text-gray-900 mb-2">Resumen del viaje</h4>
               <div className="text-sm text-gray-600 space-y-1">
-                <p><strong>Desde:</strong> {formData.pickupAddress}</p>
-                <p><strong>Hasta:</strong> {formData.destinationAddress}</p>
+                <div className="mb-3">
+                  <p className="font-medium text-gray-800">Viaje de ida:</p>
+                  <p><strong>Desde:</strong> {formData.pickupAddress}</p>
+                  <p><strong>Hasta:</strong> {formData.destinationAddress}</p>
+                  {tripCalculation && (
+                    <p><strong>Precio:</strong> {tripCalculation.total.toFixed(2)}€</p>
+                  )}
+                </div>
+                
+                {showReturnTrip && (
+                  <div className="mb-3 pt-2 border-t border-gray-300">
+                    <p className="font-medium text-gray-800">Viaje de vuelta:</p>
+                    <p><strong>Desde:</strong> {formData.destinationAddress}</p>
+                    <p><strong>Hasta:</strong> {formData.pickupAddress}</p>
+                    <p><strong>Fecha:</strong> {returnTripData.scheduledDate} {returnTripData.scheduledTime}</p>
+                    {tripCalculation && (
+                      <p><strong>Precio:</strong> {tripCalculation.total.toFixed(2)}€</p>
+                    )}
+                  </div>
+                )}
+                
                 {tripCalculation && (
-                  <>
-                    <p><strong>Distancia:</strong> {tripCalculation.distance}km</p>
-                    <p><strong>Total:</strong> {tripCalculation.total.toFixed(2)}€</p>
-                  </>
+                  <div className="pt-2 border-t border-gray-300">
+                    <p className="font-bold text-gray-900">
+                      <strong>Total:</strong> {showReturnTrip ? (tripCalculation.total * 2).toFixed(2) : tripCalculation.total.toFixed(2)}€
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
 
             {tripCalculation && (
               <StripeCheckout
-                amount={tripCalculation.total}
-                bookingData={formData}
+                amount={showReturnTrip ? tripCalculation.total * 2 : tripCalculation.total}
+                bookingData={{...formData, returnTripData: showReturnTrip ? returnTripData : null}}
                 tripCalculation={tripCalculation}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}

@@ -34,6 +34,7 @@ export function calculateTripPrice(
     hasLuggage?: boolean
     luggageCount?: number
     vehicleType?: string
+    needsChildSeat?: boolean
     passengerGroup?: string
     scheduledDateTime?: Date
   } = {}
@@ -43,7 +44,8 @@ export function calculateTripPrice(
     isPort, 
     hasLuggage, 
     luggageCount = 0,
-    vehicleType = 'standard', 
+    vehicleType = 'standard',
+    needsChildSeat = false,
     passengerGroup = '4-or-less',
     scheduledDateTime
   } = options
@@ -67,7 +69,10 @@ export function calculateTripPrice(
   // Suplementos por tipo de vehículo
   if (vehicleType === 'accessible') {
     surcharges += PRICING_CONFIG.accessibleVehicleFee
-  } else if (vehicleType === 'child-seats') {
+  }
+
+  // Suplemento por silla de bebé (opción independiente)
+  if (needsChildSeat) {
     surcharges += PRICING_CONFIG.childSeatFee
   }
 

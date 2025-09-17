@@ -65,7 +65,10 @@ async function calculateTripPriceWithConfig(
   // Suplementos por tipo de vehículo
   if (vehicleType === 'accessible') {
     surcharges += config.accessibleVehicleFee
-  } else if (vehicleType === 'child-seats') {
+  }
+
+  // Suplemento por silla de bebé (opción independiente)
+  if (options.needsChildSeat) {
     surcharges += config.childSeatFee
   }
 
@@ -108,6 +111,7 @@ export interface BookingFormData {
   // Configuración del viaje
   passengers: string
   vehicleType: string
+  needsChildSeat: boolean
   hasLuggage: boolean
   luggageCount: string
   timing: string
@@ -119,6 +123,9 @@ export interface BookingFormData {
   flightNumber?: string
   isPort: boolean
   portInfo?: string // Número de crucero/naviera o terminal
+  needsReturnTrip: boolean
+  returnDate?: string
+  returnTime?: string
   hasObservations: boolean
   observations?: string
   
@@ -137,11 +144,13 @@ export function useTaxiBooking() {
     destinationAddress: "",
     passengers: "4-or-less",
     vehicleType: "standard",
+    needsChildSeat: false,
     hasLuggage: false,
     luggageCount: "1",
     timing: "now",
     isAirport: false,
     isPort: false,
+    needsReturnTrip: false,
     hasObservations: false,
     paymentMethod: "card",
     acceptsPrivacy: true,
@@ -220,6 +229,7 @@ export function useTaxiBooking() {
           hasLuggage: formData.hasLuggage,
           luggageCount: formData.hasLuggage ? parseInt(formData.luggageCount) : 0,
           vehicleType: formData.vehicleType,
+          needsChildSeat: formData.needsChildSeat,
           passengerGroup: formData.passengers,
           scheduledDateTime
         })
@@ -249,6 +259,7 @@ export function useTaxiBooking() {
             hasLuggage: formData.hasLuggage,
             luggageCount: formData.hasLuggage ? parseInt(formData.luggageCount) : 0,
             vehicleType: formData.vehicleType,
+            needsChildSeat: formData.needsChildSeat,
             passengerGroup: formData.passengers,
             scheduledDateTime
           })
@@ -271,6 +282,7 @@ export function useTaxiBooking() {
     formData.hasLuggage,
     formData.luggageCount,
     formData.vehicleType,
+    formData.needsChildSeat,
     formData.passengers,
     formData.timing,
     formData.scheduledDate,
@@ -335,6 +347,11 @@ export function useTaxiBooking() {
     
     if (formData.isPort && !formData.portInfo) {
       alert('Por favor, especifica el número de crucero, naviera o terminal')
+      return false
+    }
+    
+    if (formData.needsReturnTrip && (!formData.returnDate || !formData.returnTime)) {
+      alert('Por favor, especifica la fecha y hora del viaje de vuelta')
       return false
     }
     
