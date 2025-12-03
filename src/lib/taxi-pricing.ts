@@ -62,7 +62,7 @@ export function calculateTripPrice(
   }
 
   // Suplemento por grupo grande
-  if (passengerGroup === 'more-than-4') {
+  if (parseInt(passengerGroup) > 4) {
     surcharges += PRICING_CONFIG.largeGroupSurcharge
   }
 

@@ -44,7 +44,7 @@ async function calculateTripPriceWithConfig(
     hasLuggage, 
     luggageCount = 0,
     vehicleType = 'standard', 
-    passengerGroup = '4-or-less',
+    passengerGroup = '4',
     scheduledDateTime
   } = options
 
@@ -58,7 +58,7 @@ async function calculateTripPriceWithConfig(
   }
 
   // Suplemento por grupo grande
-  if (passengerGroup === 'more-than-4') {
+  if (parseInt(passengerGroup) > 4) {
     surcharges += config.largeGroupSurcharge
   }
 
@@ -142,7 +142,7 @@ export function useTaxiBooking() {
     email: "",
     pickupAddress: "",
     destinationAddress: "",
-    passengers: "4-or-less",
+    passengers: "4",
     vehicleType: "standard",
     needsChildSeat: false,
     hasLuggage: false,
