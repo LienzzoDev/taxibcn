@@ -65,7 +65,7 @@ export function AddressAutocomplete({
 
     try {
       const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-        types: ['address'],
+        types: ['establishment', 'geocode'],
         componentRestrictions: { country: 'es' },
         fields: ['formatted_address', 'geometry', 'place_id', 'name']
       })

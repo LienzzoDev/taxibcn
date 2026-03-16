@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verificar autenticación
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Token requerido' }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function PATCH(
     }
 
     const { status } = await request.json();
-    const bookingId = params.id;
+    const { id: bookingId } = await params;
 
     // Validar que el estado sea válido
     const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
