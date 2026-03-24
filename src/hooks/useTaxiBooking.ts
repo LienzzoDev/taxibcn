@@ -167,46 +167,29 @@ export function useTaxiBooking() {
     }))
   }
 
-  // Función para calcular distancia usando Google Maps
+  // Función para calcular distancia usando OSRM (gratuito)
   const calculateDistance = async (
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number }
   ): Promise<{ distance: number; duration: number } | null> => {
-    if (typeof google === 'undefined' || !google.maps) {
-      console.warn('Google Maps API no disponible')
+    try {
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=false`
+      )
+      const data = await res.json()
+
+      if (data.code === 'Ok' && data.routes?.[0]) {
+        const route = data.routes[0]
+        return {
+          distance: Math.round((route.distance / 1000) * 100) / 100, // metros a km
+          duration: Math.round(route.duration / 60) // segundos a minutos
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Error calculando distancia:', error)
       return null
     }
-
-    return new Promise((resolve) => {
-      const service = new google.maps.DistanceMatrixService()
-      
-      service.getDistanceMatrix({
-        origins: [origin],
-        destinations: [destination],
-        travelMode: google.maps.TravelMode.DRIVING,
-        unitSystem: google.maps.UnitSystem.METRIC,
-        avoidHighways: false,
-        avoidTolls: false
-      }, (response, status) => {
-        if (status === google.maps.DistanceMatrixStatus.OK && response) {
-          const element = response.rows[0]?.elements[0]
-          
-          if (element && element.status === 'OK') {
-            const distanceKm = element.distance!.value / 1000 // Convertir a km
-            const durationMin = element.duration!.value / 60 // Convertir a minutos
-            
-            resolve({
-              distance: Math.round(distanceKm * 100) / 100,
-              duration: Math.round(durationMin)
-            })
-          } else {
-            resolve(null)
-          }
-        } else {
-          resolve(null)
-        }
-      })
-    })
   }
 
   // Recalcular precio cuando cambien los datos relevantes

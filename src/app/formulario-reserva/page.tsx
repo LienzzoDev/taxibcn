@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
+
 import { StripeCheckout } from "@/components/StripeCheckout";
 import {
   Dialog,
@@ -852,9 +852,5 @@ function TaxiBookingForm() {
 }
 
 export default function TaxiBookingPage() {
-  return (
-    <GoogleMapsProvider>
-      <TaxiBookingForm />
-    </GoogleMapsProvider>
-  );
+  return <TaxiBookingForm />;
 }
