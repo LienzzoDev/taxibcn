@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdminToken } from '@/lib/adminAuth'
+import { sendBookingConfirmationEmail } from '@/lib/emails'
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,6 +70,24 @@ export async function POST(request: NextRequest) {
         status: 'PENDING'
       }
     })
+
+    // Enviar emails de confirmación (no bloquea la respuesta)
+    sendBookingConfirmationEmail({
+      id: booking.id,
+      firstName: booking.firstName,
+      lastName: booking.lastName,
+      email: booking.email,
+      phone: booking.phone,
+      pickupAddress: booking.pickupAddress,
+      destinationAddress: booking.destinationAddress,
+      totalAmount: booking.totalAmount,
+      paymentMethod: booking.paymentMethod,
+      timing: booking.timing,
+      scheduledDate: booking.scheduledDate,
+      scheduledTime: booking.scheduledTime,
+      passengers: booking.passengers,
+      vehicleType: booking.vehicleType,
+    }).catch(err => console.error('Error enviando emails:', err))
 
     return NextResponse.json({
       success: true,
